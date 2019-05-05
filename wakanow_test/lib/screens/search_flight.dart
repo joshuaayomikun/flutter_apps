@@ -86,7 +86,11 @@ class SearchFlightState extends State<SearchFlight>{
                       ),
                     )
                   ),
-                  Container(width: 5.0),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  
                   Expanded(
                     child: ListTile(
                       title: DropdownButton(
@@ -125,7 +129,7 @@ class SearchFlightState extends State<SearchFlight>{
                         return 'Please chose date';
                       }
                     },
-                    enabled: false,
+                    enabled: true,
                     decoration: InputDecoration(
                       labelText: 'Departure Date',
                       labelStyle: textStyle,
@@ -266,7 +270,7 @@ class SearchFlightState extends State<SearchFlight>{
     return cityCode;
   }
 
-  Future<dynamic> getCredentials() async{
+  Future<String> getCredentials() async{
       FirstAPIBody firstAPIBody = FirstAPIBody("client_credentials", "9EUyDJvzfPDs57kucVPODMtsYALPtmMN", "client_secret");
       
       var response = await http.post("https://test.api.amadeus.com/v1/security/oauth2/token", headers: {
