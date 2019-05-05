@@ -28,6 +28,7 @@ class SearchFlightState extends State<SearchFlight>{
   String _travelClass = "Economy";
   String _origin ="";
   String _destination ="";
+  String _bearer = "";
   Future<Null> selecteDate(BuildContext context) async{
    final DateTime picked = await showDatePicker(
       context: context,
@@ -208,8 +209,8 @@ class SearchFlightState extends State<SearchFlight>{
                           ),
                           onPressed: (){
                             setState(() {
-                              var bearer = this.getCredentials();
-                              navigateToFlightListPage(SearchDetails(originController.text, destinationController.text, departureDateController.text, adultContoller.text, travelClassContoller.text), bearer );
+                              getCredential();
+                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), departureDateController.text, adultContoller.text, this._travelClass), this._bearer );
                               debugPrint("Save button clicked"); 
                             });
                           },
@@ -269,9 +270,11 @@ class SearchFlightState extends State<SearchFlight>{
 
     return cityCode;
   }
-
-  Future<String> getCredentials() async{
-      FirstAPIBody firstAPIBody = FirstAPIBody("client_credentials", "9EUyDJvzfPDs57kucVPODMtsYALPtmMN", "client_secret");
+void getCredential() async{
+   await getCredentials();
+}
+Future<Null> getCredentials() async{
+      FirstAPIBody firstAPIBody = FirstAPIBody("client_credentials", "9EUyDJvzfPDs57kucVPODMtsYALPtmMN", "noPX4LEv2j2c5pPd");
       
       var response = await http.post("https://test.api.amadeus.com/v1/security/oauth2/token", headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -279,10 +282,11 @@ class SearchFlightState extends State<SearchFlight>{
       }, body: firstAPIBody.toMap());
     if (response.statusCode == 200) {
       var result = convert.jsonDecode(response.body);
-    return result['token_type'] + result['access_token'];
+      setState(() {
+       this._bearer =  result['token_type'] + result['access_token'];
+      });
     }
     else{
-      return null;
     }
   }
 
@@ -290,6 +294,10 @@ class SearchFlightState extends State<SearchFlight>{
     bool result = await Navigator.push(context, MaterialPageRoute(builder: (context){
       return FlightList(note, bearer);
     }));
+
+    if(result){
+      debugPrint("success");
+    }
   }
 }
   

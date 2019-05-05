@@ -88,7 +88,6 @@ class FlightListState extends State<FlightList>{
       Navigator.pop(context, true);
     }
   Future<dynamic> getFlightList() async{
-      FirstAPIBody firstAPIBody = FirstAPIBody("client_credentials", "9EUyDJvzfPDs57kucVPODMtsYALPtmMN", "client_secret");
       var e = this.searchDetails.queryStringWithValue();
       var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "Content-Type": "application/json",
