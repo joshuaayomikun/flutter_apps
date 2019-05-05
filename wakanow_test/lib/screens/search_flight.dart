@@ -20,7 +20,7 @@ class SearchFlightState extends State<SearchFlight>{
   TextEditingController originController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
   TextEditingController departureDateController = TextEditingController();
-  TextEditingController adultContoller = TextEditingController();
+  TextEditingController adultController = TextEditingController();
   TextEditingController travelClassContoller = TextEditingController();
   TextEditingController passengersClassContoller = TextEditingController();
   
@@ -51,7 +51,8 @@ class SearchFlightState extends State<SearchFlight>{
     TextStyle textStyle = Theme.of(context).textTheme.title;
   this._origin = this.getCityAsString('MAD');
   this._destination = this.getCityAsString('NYC');
-
+  departureDateController.text = this._departureDate;
+  adultController.text = "1";
     return Scaffold(
       appBar: AppBar(
         title: Text('Search for Flights'),
@@ -135,7 +136,6 @@ class SearchFlightState extends State<SearchFlight>{
                         return 'Please chose date';
                       }
                     },
-                    initialValue: this._departureDate,
                     enabled: true,
                     decoration: InputDecoration(
                       labelText: 'Departure Date',
@@ -157,7 +157,7 @@ class SearchFlightState extends State<SearchFlight>{
                   child: TextFormField(
                         keyboardType: TextInputType.number,
                         style:textStyle,
-                        controller: adultContoller,
+                        controller: adultController,
                         validator: (String value){
                           if(value.isEmpty){
                             return 'Please enter number of adults';
@@ -213,7 +213,7 @@ class SearchFlightState extends State<SearchFlight>{
                           onPressed: (){
                             setState(() {
                               getCredential();
-                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), departureDateController.text, adultContoller.text, this._travelClass), this._bearer );
+                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), departureDateController.text, adultController.text, this._travelClass), this._bearer );
                               debugPrint("Save button clicked"); 
                             });
                           },
