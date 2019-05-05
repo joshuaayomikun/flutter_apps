@@ -29,6 +29,7 @@ class SearchFlightState extends State<SearchFlight>{
   String _origin ="";
   String _destination ="";
   String _bearer = "";
+  String _departureDate ="2018-08-01";
   Future<Null> selecteDate(BuildContext context) async{
    final DateTime picked = await showDatePicker(
       context: context,
@@ -123,6 +124,10 @@ class SearchFlightState extends State<SearchFlight>{
                       selecteDate(context);
                     },
                     child: TextFormField(
+                        keyboardType: TextInputType.numberWithOptions(
+                          signed: false,
+                          decimal: false
+                        ),
                     style: textStyle,
                     controller: departureDateController,
                     validator: (String value){
@@ -130,6 +135,7 @@ class SearchFlightState extends State<SearchFlight>{
                         return 'Please chose date';
                       }
                     },
+                    initialValue: this._departureDate,
                     enabled: true,
                     decoration: InputDecoration(
                       labelText: 'Departure Date',
@@ -149,10 +155,7 @@ class SearchFlightState extends State<SearchFlight>{
               Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: TextFormField(
-                        keyboardType: TextInputType.numberWithOptions(
-                          signed: false,
-                          decimal: false
-                        ),
+                        keyboardType: TextInputType.number,
                         style:textStyle,
                         controller: adultContoller,
                         validator: (String value){

@@ -51,7 +51,7 @@ class FlightListState extends State<FlightList>{
     TextStyle titleStyle = Theme.of(context).textTheme.subhead;
 
     return ListView.builder(
-      itemCount: this.apiResult['length'],
+      itemCount: this.apiResult['data']['offerItems']['length'],
       itemBuilder: (BuildContext context, int position){
         return Card(
           color:Colors.white,
@@ -87,22 +87,21 @@ class FlightListState extends State<FlightList>{
   void moveToLastscreen() {
       Navigator.pop(context, true);
     }
-  Future<dynamic> getFlightList() async{
+    void getFlightsList() async{
+      await getFlightList();
+    }
+  Future<Null> getFlightList() async{
       var e = this.searchDetails.queryStringWithValue();
       var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": "Bearer bvhFrGPpGGv7Ep6SC7yV4UFj6gtD"
+        "Authorization": this.bearer
       });
     if (response.statusCode == 200) {
       var result = convert.jsonDecode(response.body);
       setState(() {
         this.apiResult = result;
       });
-    return result;
-    }
-    else{
-      return null;
     }
   }
 }
