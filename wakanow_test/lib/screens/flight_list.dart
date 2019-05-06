@@ -22,18 +22,24 @@ class FlightListState extends State<FlightList>{
   final SearchDetails searchDetails;
   final String bearer;
   var apiResult;
+      List<FlightInfo> flightList = List<FlightInfo>();
   FlightListState(this.searchDetails, this.bearer);
+  int count = 0;
   Future<Null> getFlightLists() async{
-      var e = this.searchDetails.queryStringWithValue();
-     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
+    var e = this.searchDetails.queryStringWithValue();
+    var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "authorization":this.bearer,
          "content-type":"application/json",
         "accept": "application/json"
-      });
-      if (response.statusCode == 200) {
+    });
+    if (response.statusCode == 200) {
       final Map<String, dynamic> result = json.decode(response.body);
       setState(() {
       this.apiResult = result;
+      this.count = this.apiResult['data'].length;
+      for(int i = 0; i < count; i++){
+        this.flightList.add(FlightInfo.fromMapObject(this.apiResult['data'][i]));
+      }
       });
     } else {
       throw Exception('Failed to load internet');
@@ -44,7 +50,7 @@ class FlightListState extends State<FlightList>{
     }
   @override
   Widget build(BuildContext context){ 
-  this.getFlightList();
+  getFlightList();
     return (
       WillPopScope(
       onWillPop:(){
@@ -54,13 +60,12 @@ class FlightListState extends State<FlightList>{
        appBar:AppBar(
       title:  Text('Fight Search results')
       ),
-      body:
-            getFlightListView(this.apiResult['data']),
+      body:getFlightListView(),
           
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           debugPrint('FAB clicked');
-          moveToLastscreen();
+          navigateToFlight();
         },
         child: Icon(Icons.search),
       ),
@@ -68,10 +73,9 @@ class FlightListState extends State<FlightList>{
       )
     );
   }
-  ListView getFlightListView(snapShot){
-    if(snapShot['data'] != null){
+  ListView getFlightListView(){
     return ListView.builder(
-      itemCount: snapShot.length,
+      itemCount: count,
       itemBuilder: (BuildContext context, int position){
         return Card(
           color:Colors.white,
@@ -84,7 +88,7 @@ class FlightListState extends State<FlightList>{
                 color:Colors.grey,)
             ),
             title:Text(
-              this.apiResult[position]['type'],
+              this.flightList[position].carrierCode,
             ),
             subtitle: Text(this.apiResult[position].type),
             trailing: GestureDetector(
@@ -102,23 +106,20 @@ class FlightListState extends State<FlightList>{
         );
       }
     );
-  }
-  else{
-    return ListView(
-      children:<Widget>[
-      ListTile(
-        leading: Icon(
-          Icons.cancel
-        ),
-        title: Text("No data"),
-      )
-    ]);
-  }
+  
   }
   void moveToLastscreen() {
       Navigator.pop(context, true);
     }
+  void navigateToFlight() async{
+   bool result = await Navigator.push(context, MaterialPageRoute(builder: (context){
+      return SearchFlight();
+    }));
 
+    if(result == true){
+      await getFlightLists();
+    }
+  }
   
 }
 
@@ -130,6 +131,7 @@ class SearchDetails {
  String _travelClass;
 
  SearchDetails(this._origin, this._destination, this._departureDate, this._adult, this._travelClass);
+ 
  String get origin => _origin;
  String get destination => _destination;
  String get departure => _departureDate;
@@ -156,5 +158,35 @@ class SearchDetails {
    var result = 'origin=$origin&destination=$destination&departureDate=$_departureDate&adults=$adult&travelClass=$travelClass&nonStop=true&currency=ngn&max=50';
    return result;
  }
+}
+
+class FlightInfo{
+  String _carrierName; 
+  String _carrierCode; 
+  String _departureCode;
+  String _arrivalCode;
+  String _departureTime;
+  String _arrivalTime;
+  String _price;
+
+  FlightInfo(this._carrierName,this._carrierCode, this._departureCode, this._arrivalCode, this._departureTime, this._arrivalTime, this._price);
+
+ String get carrierName => _carrierName;
+ String get carrierCode => _carrierCode;
+ String get departureCode => _departureCode;
+ String get arrivalCode => _arrivalCode;
+ String get departureTime => _departureTime;
+ String get arrivalTime => _arrivalTime;
+ String get price => _price;
+
+ 
+  FlightInfo.fromMapObject(Map<String, dynamic> map){
+    this._carrierCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["carrierCode"];
+    this._departureCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["departure"]["iataCode"];
+    this._arrivalCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["arrival"]["iataCode"];
+    this._departureTime = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["departure"]["at"];
+    this._arrivalTime =  map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["arrival"]["at"];
+    this._price = map['offerItems'][0]["price"]["total"];
+  }
 }
 

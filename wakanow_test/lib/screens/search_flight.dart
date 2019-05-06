@@ -284,6 +284,7 @@ Future<Null> getCredentials() async{
     }));
 
     if(result){
+      //await getFlightLists();
       debugPrint("success");
     }
   }
