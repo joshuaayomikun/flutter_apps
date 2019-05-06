@@ -3,6 +3,8 @@ import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:wakanow_test/screens/flight_list.dart';
+import 'package:intl/intl.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class SearchFlight extends StatefulWidget{
 
@@ -16,43 +18,47 @@ class SearchFlightState extends State<SearchFlight>{
 
   static var _cities = ['New york city','Madagascar'];
   static var _class = ['Economy'];
+  int _adults = 1;
 
   TextEditingController originController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
-  TextEditingController departureDateController = TextEditingController();
-  TextEditingController adultController = TextEditingController();
   TextEditingController travelClassContoller = TextEditingController();
   TextEditingController passengersClassContoller = TextEditingController();
   
-  DateTime _date = new DateTime.now();
+String fmDate(DateTime date){
+return DateFormat.yMMMd().format(date);
+}
+
+  var _date = DateFormat.yMMMd().format(DateTime.now());
   String _travelClass = "Economy";
   String _origin ="";
   String _destination ="";
   String _bearer = "";
-  String _departureDate ="2018-08-01";
-  Future<Null> selecteDate(BuildContext context) async{
-   final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2019),
-      lastDate: DateTime(2020),
-      
-    );
-    if(picked != null && picked != _date){
-      setState(() {
-       _date = picked;
-       departureDateController.toString();
-      });
-    }
-  }
+  DateTime _departureDate =DateTime.now();
 
   @override
   Widget build(BuildContext context){
+    void _selectDate() async{
+   final DateTime  selectedDate = await showDatePicker(
+  context: context,
+  initialDate: this._departureDate,
+  firstDate: DateTime(2019),
+  lastDate: DateTime(2030),
+  builder: (BuildContext context, Widget child) {
+    return Theme(
+      data: ThemeData.dark(),
+      child: child,
+    );
+  },
+);
+if (selectedDate != null && selectedDate != this._departureDate)
+      setState(() {
+        this._departureDate = selectedDate;
+      });
+    }
     TextStyle textStyle = Theme.of(context).textTheme.title;
   this._origin = this.getCityAsString('MAD');
   this._destination = this.getCityAsString('NYC');
-  departureDateController.text = this._departureDate;
-  adultController.text = "1";
     return Scaffold(
       appBar: AppBar(
         title: Text('Search for Flights'),
@@ -120,63 +126,40 @@ class SearchFlightState extends State<SearchFlight>{
               ),
               Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: GestureDetector(
-                    onTap: (){
-                      selecteDate(context);
-                    },
-                    child: TextFormField(
-                        keyboardType: TextInputType.numberWithOptions(
-                          signed: false,
-                          decimal: false
-                        ),
-                    style: textStyle,
-                    controller: departureDateController,
-                    validator: (String value){
-                      if(value.isEmpty){
-                        return 'Please chose date';
-                      }
-                    },
-                    enabled: true,
-                    decoration: InputDecoration(
-                      labelText: 'Departure Date',
-                      labelStyle: textStyle,
-                      errorStyle: TextStyle(
-                        color: Colors.yellowAccent,
-                        fontSize: 15.0
-                      ),
-                      hintText: 'Pick a date',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0)
-                      ),
+                  child: 
+                    ListTile(
+                    leading: IconButton(
+                      icon: Icon(Icons.calendar_today),
+                      onPressed: (){
+                        _selectDate();
+                      },
                     ),
+                    title: const Text('Departure date'),
+                    subtitle:  Text(fmDate(this._departureDate)),
                   ),
-                )
               ),
               Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        style:textStyle,
-                        controller: adultController,
-                        validator: (String value){
-                          if(value.isEmpty){
-                            return 'Please enter number of adults';
-                          }
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Adult',
-                          labelStyle: textStyle,
-                          errorStyle: TextStyle(
-                            color: Colors.yellowAccent,
-                            fontSize: 15.0
-                          ),
-                          hintText: 'Enter number of adults',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)
-                          )
-                        ),
+                  child:   
+                  Card(
+                    
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.contacts
                       ),
-              ),
+                    title: NumberPicker.integer(
+                      initialValue: this._adults,
+                      minValue: 0,
+                      maxValue: 20,
+                      step: 1,
+                      onChanged: (value){ 
+                        setState((){
+                          this._adults = value;
+                        });
+                      }
+                    ),
+                  subtitle: Text('Adults'),
+              ),)),
               Padding(
                   padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
                   child: DropdownButton (
@@ -213,7 +196,7 @@ class SearchFlightState extends State<SearchFlight>{
                           onPressed: (){
                             setState(() {
                               getCredential();
-                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), departureDateController.text, adultController.text, this._travelClass), this._bearer );
+                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), fmDate(this._departureDate), this._adults.toString(), this._travelClass), this._bearer );
                               debugPrint("Save button clicked"); 
                             });
                           },
