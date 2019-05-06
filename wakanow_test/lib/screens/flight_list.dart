@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:wakanow_test/screens/search_flight.dart';
 import 'package:intl/intl.dart';
@@ -22,8 +23,28 @@ class FlightListState extends State<FlightList>{
   final String bearer;
   var apiResult;
   FlightListState(this.searchDetails, this.bearer);
+  Future<Null> getFlightLists() async{
+      var e = this.searchDetails.queryStringWithValue();
+     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
+        "authorization":this.bearer,
+         "content-type":"application/json",
+        "accept": "application/json"
+      });
+      if (response.statusCode == 200) {
+      final Map<String, dynamic> result = json.decode(response.body);
+      setState(() {
+      this.apiResult = result;
+      });
+    } else {
+      throw Exception('Failed to load internet');
+    }
+    }
+    void getFlightList() async{
+      await this.getFlightLists();
+    }
   @override
   Widget build(BuildContext context){ 
+  this.getFlightList();
     return (
       WillPopScope(
       onWillPop:(){
@@ -33,14 +54,9 @@ class FlightListState extends State<FlightList>{
        appBar:AppBar(
       title:  Text('Fight Search results')
       ),
-      body: Container(
-        child: FutureBuilder(
-          future: this.getFlightList(),
-          builder: (BuildContext context, AsyncSnapshot snapShot){
-            getFlightListView(snapShot);
-          },
-        )
-      ),
+      body:
+            getFlightListView(this.apiResult['data']),
+          
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           debugPrint('FAB clicked');
@@ -53,9 +69,9 @@ class FlightListState extends State<FlightList>{
     );
   }
   ListView getFlightListView(snapShot){
-    
+    if(snapShot['data'] != null){
     return ListView.builder(
-      itemCount: snapShot['length'],
+      itemCount: snapShot.length,
       itemBuilder: (BuildContext context, int position){
         return Card(
           color:Colors.white,
@@ -68,9 +84,9 @@ class FlightListState extends State<FlightList>{
                 color:Colors.grey,)
             ),
             title:Text(
-              this.apiResult[position].title,
+              this.apiResult[position]['type'],
             ),
-            subtitle: Text(this.apiResult[position].date),
+            subtitle: Text(this.apiResult[position].type),
             trailing: GestureDetector(
               onTap:(){
               },
@@ -87,22 +103,22 @@ class FlightListState extends State<FlightList>{
       }
     );
   }
+  else{
+    return ListView(
+      children:<Widget>[
+      ListTile(
+        leading: Icon(
+          Icons.cancel
+        ),
+        title: Text("No data"),
+      )
+    ]);
+  }
+  }
   void moveToLastscreen() {
       Navigator.pop(context, true);
     }
-    void getFlightsList() async{
-      await getFlightList();
-    }
-  Future<Map<String, dynamic>> getFlightList() async{
-      var e = this.searchDetails.queryStringWithValue();
-     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
-        "authorization":this.bearer,
-         "content-type":"application/json",
-        "accept": "application/json"
-      });
-      Map<String, dynamic> result = convert.json.decode(response.body);
-    return result;
-    }
+
   
 }
 
