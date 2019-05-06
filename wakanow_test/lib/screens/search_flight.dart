@@ -74,8 +74,8 @@ if (selectedDate != null && selectedDate != this._departureDate)
     });
   }
     TextStyle textStyle = Theme.of(context).textTheme.title;
-  this._origin = this.getCityAsString('MAD');
-  this._destination = this.getCityAsString('NYC');
+  this._origin = this.getCityAsString('NYC');
+  this._destination = this.getCityAsString('MAD');
     return Scaffold(
       appBar: AppBar(
         title: Text('Search for Flights'),

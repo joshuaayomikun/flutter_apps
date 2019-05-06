@@ -95,12 +95,13 @@ class FlightListState extends State<FlightList>{
     }
   Future<Map<String, dynamic>> getFlightList() async{
       var e = this.searchDetails.queryStringWithValue();
-      dynamic response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
+     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "authorization":this.bearer,
          "content-type":"application/json",
         "accept": "application/json"
       });
-    return response;
+      Map<String, dynamic> result = convert.json.decode(response.body);
+    return result;
     }
   
 }
