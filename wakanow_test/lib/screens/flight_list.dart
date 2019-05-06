@@ -25,7 +25,7 @@ class FlightListState extends State<FlightList>{
   @override
   Widget build(BuildContext context){ 
     
-  getFlightList();
+  this.getFlightList();
     return (
       WillPopScope(
       onWillPop:(){
@@ -41,7 +41,7 @@ class FlightListState extends State<FlightList>{
           debugPrint('FAB clicked');
         },
         tooltip:'Add Note',
-        child: Icon(Icons.add),
+        child: Icon(Icons.search),
       ),
       )
       )
@@ -51,7 +51,7 @@ class FlightListState extends State<FlightList>{
     TextStyle titleStyle = Theme.of(context).textTheme.subhead;
 
     return ListView.builder(
-      itemCount: this.apiResult['data']['offerItems']['length'],
+      itemCount: this.apiResult['length'],
       itemBuilder: (BuildContext context, int position){
         return Card(
           color:Colors.white,
@@ -93,17 +93,19 @@ class FlightListState extends State<FlightList>{
   Future<Null> getFlightList() async{
       var e = this.searchDetails.queryStringWithValue();
       var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
-        "Content-Type": "application/json",
+         "Content-Type":"application/json",
         "Accept": "application/json",
         "Authorization": this.bearer
-      });
+      }).then(( dynamic response) {
     if (response.statusCode == 200) {
       var result = convert.jsonDecode(response.body);
       setState(() {
-        this.apiResult = result;
+        this.apiResult = result['data']['offerItems'];
       });
     }
+      });
   }
+  
 }
 
 class SearchDetails {
