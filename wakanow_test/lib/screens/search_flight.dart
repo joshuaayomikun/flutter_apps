@@ -26,7 +26,7 @@ class SearchFlightState extends State<SearchFlight>{
   TextEditingController passengersClassContoller = TextEditingController();
   
 String fmDate(DateTime date){
-return DateFormat.yMMMd().format(date);
+return DateFormat('yyyy-MM-dd').format(date);
 }
 
   var _date = DateFormat.yMMMd().format(DateTime.now());
@@ -34,7 +34,7 @@ return DateFormat.yMMMd().format(date);
   String _origin ="";
   String _destination ="";
   String _bearer = "";
-  DateTime _departureDate =DateTime.now();
+  DateTime _departureDate =DateTime(2019,08,01);
 
   @override
   Widget build(BuildContext context){
@@ -56,6 +56,23 @@ if (selectedDate != null && selectedDate != this._departureDate)
         this._departureDate = selectedDate;
       });
     }
+    Future _showIntDialog() async {
+    await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return new NumberPickerDialog.integer(
+          minValue: 0,
+          maxValue: 100,
+          step: 1,
+          initialIntegerValue: this._adults,
+        );
+      },
+    ).then((num value) {
+      if (value != null) {
+        setState(() => this._adults = value);
+      }
+    });
+  }
     TextStyle textStyle = Theme.of(context).textTheme.title;
   this._origin = this.getCityAsString('MAD');
   this._destination = this.getCityAsString('NYC');
@@ -68,14 +85,17 @@ if (selectedDate != null && selectedDate != this._departureDate)
       ),
       body: Padding(
         padding: EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
-        child: Container(
           child: ListView(
             children: <Widget>[
               Row(
                 children: <Widget>[
                   Expanded(
+                    
                     child: ListTile(
-                      title: DropdownButton(
+                      leading: Icon(
+                        Icons.location_city
+                      ),
+                      subtitle: DropdownButton(
                         items: _cities.map((String dropDownStringItem){
                           return DropdownMenuItem(
                             value: dropDownStringItem,
@@ -93,6 +113,7 @@ if (selectedDate != null && selectedDate != this._departureDate)
                           });
                         },
                       ),
+                      title: Text('Origin'),
                     )
                   ),
                 ],
@@ -102,7 +123,10 @@ if (selectedDate != null && selectedDate != this._departureDate)
                   
                   Expanded(
                     child: ListTile(
-                      title: DropdownButton(
+                      leading: Icon(
+                        Icons.location_city
+                      ),
+                      subtitle: DropdownButton(
                         items: _cities.map((String dropDownStringItem){
                           return DropdownMenuItem(
                             value: dropDownStringItem,
@@ -120,12 +144,13 @@ if (selectedDate != null && selectedDate != this._departureDate)
                           });
                         },
                       ),
+                      title: Text('Destination'),
                     )
                   ),
                 ],
               ),
               Padding(
-                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  padding: EdgeInsets.only(top: 15.0),
                   child: 
                     ListTile(
                     leading: IconButton(
@@ -139,30 +164,24 @@ if (selectedDate != null && selectedDate != this._departureDate)
                   ),
               ),
               Padding(
-                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child:   
-                  Card(
-                    
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.contacts
+                  padding: EdgeInsets.only(top: 15.0),
+                  child:  ListTile(
+                      leading: IconButton(
+                        icon: Icon(Icons.contacts),
+                        onPressed:() {
+                          _showIntDialog();
+                        },
                       ),
-                    title: NumberPicker.integer(
-                      initialValue: this._adults,
-                      minValue: 0,
-                      maxValue: 20,
-                      step: 1,
-                      onChanged: (value){ 
-                        setState((){
-                          this._adults = value;
-                        });
-                      }
-                    ),
-                  subtitle: Text('Adults'),
-              ),)),
+                    title: Text(this._adults.toString() + " Adults"),
+              ),),
               Padding(
-                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-                  child: DropdownButton (
+                  padding: EdgeInsets.only(top: 15.0),
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.people
+                    ),
+                    title: Text("Travel Class"),
+                  subtitle: DropdownButton (
                         items: _class.map((String dropDownStringItem){
                           return DropdownMenuItem(
                             value: dropDownStringItem,
@@ -180,9 +199,9 @@ if (selectedDate != null && selectedDate != this._departureDate)
                           });
                         },
                       ),
-              ),
+              )),
               Padding(
-                  padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+                  padding: EdgeInsets.only(top: 15.0),
                   child: Row(
                     children: <Widget>[
                       Expanded(
@@ -196,35 +215,16 @@ if (selectedDate != null && selectedDate != this._departureDate)
                           onPressed: (){
                             setState(() {
                               getCredential();
-                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), fmDate(this._departureDate), this._adults.toString(), this._travelClass), this._bearer );
-                              debugPrint("Save button clicked"); 
                             });
                           },
                         ),
                       ),
-                      Container(width: 5.0),
-                      Expanded(
-                        child: RaisedButton(
-                          color: Theme.of(context).primaryColorDark,
-                          textColor: Theme.of(context).primaryColorLight,
-                          child: Text(
-                            'Cancel',
-                            textScaleFactor:1.5,
-                          ),
-                          onPressed: (){
-                            setState(() {
-                            debugPrint("Cancel button clicked");
-                            });
-                          },
-                        ),
-                      )
                     ],
                   ),
                 )
             ],
           ),
         )
-      )
     );
   }
                                                              
@@ -269,7 +269,9 @@ Future<Null> getCredentials() async{
     if (response.statusCode == 200) {
       var result = convert.jsonDecode(response.body);
       setState(() {
-       this._bearer =  result['token_type'] + result['access_token'];
+       this._bearer =  result['token_type'] + " " + result['access_token'];
+                              navigateToFlightListPage(SearchDetails(updateCityAsCityCode(this._origin), updateCityAsCityCode(this._destination), fmDate(this._departureDate), this._adults.toString(), this._travelClass), this._bearer );
+                              debugPrint("Save button clicked"); 
       });
     }
     else{

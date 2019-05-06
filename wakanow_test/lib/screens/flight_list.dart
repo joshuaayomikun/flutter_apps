@@ -126,8 +126,8 @@ class SearchDetails {
  set destination(String newDestination){
    this._destination = newDestination;
  }
- set departure(String newDeparture){
-   this._departureDate = newDeparture;
+ set departureDate(String newDepartureDate){
+   this._departureDate = newDepartureDate;
  }
  set adult(String newAdult){
    this._adult = newAdult;
@@ -136,7 +136,8 @@ class SearchDetails {
    this._travelClass = newTravelClass;
  }
  String queryStringWithValue(){
-   var result = 'origin=$_origin&destination=$destination&departureDate=2019-08-01&adults=$_adult&travelClass=$travelClass&nonStop=true&currency=ngn&max=50';
+   
+   var result = 'origin=$origin&destination=$destination&departureDate=$_departureDate&adults=$adult&travelClass=$travelClass&nonStop=true&currency=ngn&max=50';
    return result;
  }
 }
