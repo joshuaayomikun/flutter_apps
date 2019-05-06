@@ -24,8 +24,6 @@ class FlightListState extends State<FlightList>{
   FlightListState(this.searchDetails, this.bearer);
   @override
   Widget build(BuildContext context){ 
-    
-  
     return (
       WillPopScope(
       onWillPop:(){
@@ -39,7 +37,7 @@ class FlightListState extends State<FlightList>{
         child: FutureBuilder(
           future: this.getFlightList(),
           builder: (BuildContext context, AsyncSnapshot snapShot){
-            getFlightListView();
+            getFlightListView(snapShot);
           },
         )
       ),
@@ -54,10 +52,10 @@ class FlightListState extends State<FlightList>{
       )
     );
   }
-  ListView getFlightListView(){
+  ListView getFlightListView(snapShot){
     
     return ListView.builder(
-      itemCount: this.apiResult['length'],
+      itemCount: snapShot['length'],
       itemBuilder: (BuildContext context, int position){
         return Card(
           color:Colors.white,
@@ -95,21 +93,15 @@ class FlightListState extends State<FlightList>{
     void getFlightsList() async{
       await getFlightList();
     }
-  Future<Null> getFlightList() async{
+  Future<Map<String, dynamic>> getFlightList() async{
       var e = this.searchDetails.queryStringWithValue();
-      var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
-         "Content-Type":"application/json",
-        "Accept": "application/json",
-        "Authorization": this.bearer
-      }).then(( dynamic response) {
-    if (response.statusCode == 200) {
-      var result = convert.jsonDecode(response.body);
-      setState(() {
-        this.apiResult = result['data'];
+      dynamic response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
+        "authorization":this.bearer,
+         "content-type":"application/json",
+        "accept": "application/json"
       });
+    return response;
     }
-      });
-  }
   
 }
 
