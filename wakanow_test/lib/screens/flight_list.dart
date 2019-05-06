@@ -25,7 +25,7 @@ class FlightListState extends State<FlightList>{
   @override
   Widget build(BuildContext context){ 
     
-  this.getFlightList();
+  
     return (
       WillPopScope(
       onWillPop:(){
@@ -33,14 +33,21 @@ class FlightListState extends State<FlightList>{
       },
       child: Scaffold(
        appBar:AppBar(
-      title:  Text('Notes')
+      title:  Text('Fight Search results')
       ),
-      body: getFlightListView(),
+      body: Container(
+        child: FutureBuilder(
+          future: this.getFlightList(),
+          builder: (BuildContext context, AsyncSnapshot snapShot){
+            getFlightListView();
+          },
+        )
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           debugPrint('FAB clicked');
+          moveToLastscreen();
         },
-        tooltip:'Add Note',
         child: Icon(Icons.search),
       ),
       )
@@ -48,8 +55,7 @@ class FlightListState extends State<FlightList>{
     );
   }
   ListView getFlightListView(){
-    TextStyle titleStyle = Theme.of(context).textTheme.subhead;
-
+    
     return ListView.builder(
       itemCount: this.apiResult['length'],
       itemBuilder: (BuildContext context, int position){
@@ -64,8 +70,7 @@ class FlightListState extends State<FlightList>{
                 color:Colors.grey,)
             ),
             title:Text(
-              this.apiResult[position].title, 
-              style:titleStyle,
+              this.apiResult[position].title,
             ),
             subtitle: Text(this.apiResult[position].date),
             trailing: GestureDetector(
@@ -100,7 +105,7 @@ class FlightListState extends State<FlightList>{
     if (response.statusCode == 200) {
       var result = convert.jsonDecode(response.body);
       setState(() {
-        this.apiResult = result['data']['offerItems'];
+        this.apiResult = result['data'];
       });
     }
       });
