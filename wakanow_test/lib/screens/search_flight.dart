@@ -17,7 +17,7 @@ class SearchFlight extends StatefulWidget{
 class SearchFlightState extends State<SearchFlight>{
 
   static var _cities = ['New york city','Madagascar'];
-  static var _class = ['Economy'];
+  static var _class = ['ECONOMY'];
   int _adults = 1;
 
   TextEditingController originController = TextEditingController();
