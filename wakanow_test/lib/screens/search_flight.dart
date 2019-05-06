@@ -30,7 +30,7 @@ return DateFormat('yyyy-MM-dd').format(date);
 }
 
   var _date = DateFormat.yMMMd().format(DateTime.now());
-  String _travelClass = "Economy";
+  String _travelClass = "ECONOMY";
   String _origin ="";
   String _destination ="";
   String _bearer = "";
