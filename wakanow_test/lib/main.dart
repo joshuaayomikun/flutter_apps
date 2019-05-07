@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget{
       title:'Wakanow',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple
+        primarySwatch: Colors.blue
       ),
       home: SearchFlight(),
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:wakanow_test/screens/search_flight.dart';
-import 'package:intl/intl.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 
@@ -27,6 +26,7 @@ class FlightListState extends State<FlightList>{
   int count = 0;
   Future<Null> getFlightLists() async{
     var e = this.searchDetails.queryStringWithValue();
+
     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "authorization":this.bearer,
          "content-type":"application/json",
@@ -38,18 +38,35 @@ class FlightListState extends State<FlightList>{
       this.apiResult = result;
       this.count = this.apiResult['data'].length;
       for(int i = 0; i < count; i++){
-        this.flightList.add(FlightInfo.fromMapObject(this.apiResult['data'][i]));
+        this.flightList.add(FlightInfo.fromMapObject(this.apiResult['data'][i], this.apiResult['dictionaries']["carriers"]));
       }
       });
     } else {
-      throw Exception('Failed to load internet');
+      debugPrint(response.toString());
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+        content: Text('An error occured')
+        )
+      );
     }
     }
     void getFlightList() async{
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content:Row(
+                        children: <Widget>[
+                          new CircularProgressIndicator(),
+                          new Text("  Wait...")
+                        ],
+                      )
+        )
+      );
+     
       await this.getFlightLists();
     }
   @override
   Widget build(BuildContext context){ 
+    
   getFlightList();
     return (
       WillPopScope(
@@ -84,20 +101,52 @@ class FlightListState extends State<FlightList>{
             leading: CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(
-                Icons.airport_shuttle, 
+                Icons.flight_takeoff, 
                 color:Colors.grey,)
             ),
             title:Text(
-              this.flightList[position].carrierCode,
+              this.flightList[position].carrierName,
             ),
-            subtitle: Text(this.apiResult[position].type),
-            trailing: GestureDetector(
-              onTap:(){
-              },
-              child: Icon(
-                Icons.delete, 
-                color:Colors.grey,
-              )
+            subtitle: Padding(
+              padding: EdgeInsets.only(left: 10.0, right: 10.0),
+              child:  Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child:Text(
+                      'Departure Code: ' + this.flightList[position].departureCode
+                      )
+                    ),
+                    Expanded(
+                      child:Text(
+                      'Arrival Code: ' + this.flightList[position].arrivalCode
+                      )
+                    )
+                  ]
+                ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child:Text(
+                      'Arrival Time: ' + this.flightList[position].departureCode
+                      )
+                    ),
+                    Expanded(
+                      child:Text(
+                      'Departure Time: ' + this.flightList[position].arrivalCode
+                      )
+                    )
+                  ]
+                )
+              ],
+            ),
+            ),
+            trailing: Text(
+              'NGN ' + this.flightList[position].price
             ),
             onTap:(){
               debugPrint("ListTile Tapped");
@@ -106,7 +155,6 @@ class FlightListState extends State<FlightList>{
         );
       }
     );
-  
   }
   void moveToLastscreen() {
       Navigator.pop(context, true);
@@ -115,10 +163,6 @@ class FlightListState extends State<FlightList>{
    bool result = await Navigator.push(context, MaterialPageRoute(builder: (context){
       return SearchFlight();
     }));
-
-    if(result == true){
-      await getFlightLists();
-    }
   }
   
 }
@@ -180,13 +224,15 @@ class FlightInfo{
  String get price => _price;
 
  
-  FlightInfo.fromMapObject(Map<String, dynamic> map){
+  FlightInfo.fromMapObject(Map<String, dynamic> map, map2){
     this._carrierCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["carrierCode"];
+    this._carrierName = map2[this._carrierCode];
     this._departureCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["departure"]["iataCode"];
     this._arrivalCode = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["arrival"]["iataCode"];
     this._departureTime = map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["departure"]["at"];
     this._arrivalTime =  map['offerItems'][0]['services'][0]["segments"][0]["flightSegment"]["arrival"]["at"];
     this._price = map['offerItems'][0]["price"]["total"];
   }
+  
 }
 

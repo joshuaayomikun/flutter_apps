@@ -19,6 +19,7 @@ class SearchFlightState extends State<SearchFlight>{
   static var _cities = ['New york city','Madagascar'];
   static var _class = ['ECONOMY'];
   int _adults = 1;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   TextEditingController originController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
@@ -77,6 +78,7 @@ if (selectedDate != null && selectedDate != this._departureDate)
   this._origin = this.getCityAsString('NYC');
   this._destination = this.getCityAsString('MAD');
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Search for Flights'),
           leading: Icon(
@@ -159,8 +161,19 @@ if (selectedDate != null && selectedDate != this._departureDate)
                         _selectDate();
                       },
                     ),
-                    title: const Text('Departure date'),
-                    subtitle:  Text(fmDate(this._departureDate)),
+                    title: GestureDetector(
+                      child: const Text('Departure date'),
+                      onTap: (){
+                        _selectDate();
+                      },
+                    ),
+                    subtitle:  GestureDetector(
+                      child:Text(fmDate(this._departureDate)),
+                      onTap: (){
+                        _selectDate();
+                      },
+                      
+                    ),
                   ),
               ),
               Padding(
@@ -172,7 +185,12 @@ if (selectedDate != null && selectedDate != this._departureDate)
                           _showIntDialog();
                         },
                       ),
-                    title: Text(this._adults.toString() + " Adults"),
+                    title: GestureDetector( 
+                      child:Text(this._adults.toString() + " Adults"),
+                      onTap: (){
+                          _showIntDialog();
+                      },
+                      ),
               ),),
               Padding(
                   padding: EdgeInsets.only(top: 15.0),
@@ -261,6 +279,15 @@ void getCredential() async{
 }
 Future<Null> getCredentials() async{
       FirstAPIBody firstAPIBody = FirstAPIBody("client_credentials", "9EUyDJvzfPDs57kucVPODMtsYALPtmMN", "noPX4LEv2j2c5pPd");
+                  _scaffoldKey.currentState.showSnackBar(
+                      new SnackBar(duration: new Duration(seconds: 4), content:
+                      new Row(
+                        children: <Widget>[
+                          new CircularProgressIndicator(),
+                          new Text("  Wait...")
+                        ],
+                      ),
+                      ));
       
       var response = await http.post("https://test.api.amadeus.com/v1/security/oauth2/token", headers: {
         "Content-Type": "application/x-www-form-urlencoded",
