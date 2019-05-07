@@ -21,10 +21,20 @@ class FlightListState extends State<FlightList>{
   final SearchDetails searchDetails;
   final String bearer;
   var apiResult;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
       List<FlightInfo> flightList = List<FlightInfo>();
   FlightListState(this.searchDetails, this.bearer);
   int count = 0;
   Future<Null> getFlightLists() async{
+     _scaffoldKey.currentState.showSnackBar(
+                      new SnackBar(duration: new Duration(seconds: 4), content:
+                      new Row(
+                        children: <Widget>[
+                          new CircularProgressIndicator(),
+                          new Text("  Wait...")
+                        ],
+                      ),
+                      ));
     var e = this.searchDetails.queryStringWithValue();
 
     var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
@@ -43,30 +53,24 @@ class FlightListState extends State<FlightList>{
       });
     } else {
       debugPrint(response.toString());
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-        content: Text('An error occured')
-        )
-      );
+      _scaffoldKey.currentState.showSnackBar(
+                      new SnackBar(content:Text('An error occured')));
     }
     }
     void getFlightList() async{
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content:Row(
+      _scaffoldKey.currentState.showSnackBar(
+                      new SnackBar(duration: new Duration(seconds: 4), content:
+                      new Row(
                         children: <Widget>[
                           new CircularProgressIndicator(),
                           new Text("  Wait...")
                         ],
-                      )
-        )
-      );
-     
+                      ),
+                      ));
       await this.getFlightLists();
     }
   @override
   Widget build(BuildContext context){ 
-    
   getFlightList();
     return (
       WillPopScope(
@@ -74,6 +78,7 @@ class FlightListState extends State<FlightList>{
         moveToLastscreen();
       },
       child: Scaffold(
+      key: _scaffoldKey,
        appBar:AppBar(
       title:  Text('Fight Search results')
       ),
