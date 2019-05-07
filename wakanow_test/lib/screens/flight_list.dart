@@ -26,23 +26,14 @@ class FlightListState extends State<FlightList>{
   FlightListState(this.searchDetails, this.bearer);
   int count = 0;
   Future<Null> getFlightLists() async{
-     _scaffoldKey.currentState.showSnackBar(
-                      new SnackBar(duration: new Duration(seconds: 4), content:
-                      new Row(
-                        children: <Widget>[
-                          new CircularProgressIndicator(),
-                          new Text("  Wait...")
-                        ],
-                      ),
-                      ));
     var e = this.searchDetails.queryStringWithValue();
 
-    var response = await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
+    await http.get('https://test.api.amadeus.com/v1/shopping/flight-offers?$e', headers: {
         "authorization":this.bearer,
          "content-type":"application/json",
         "accept": "application/json"
-    });
-    if (response.statusCode == 200) {
+    }).then((http.Response response){if (response.statusCode == 200) {
+      debugPrint(response.toString());
       final Map<String, dynamic> result = json.decode(response.body);
       setState(() {
       this.apiResult = result;
@@ -56,6 +47,8 @@ class FlightListState extends State<FlightList>{
       _scaffoldKey.currentState.showSnackBar(
                       new SnackBar(content:Text('An error occured')));
     }
+    });
+    
     }
     void getFlightList() async{
       await this.getFlightLists();
@@ -70,9 +63,16 @@ class FlightListState extends State<FlightList>{
                       ));
       
     }
+
+    @override
+    void initState() {
+      super.initState();
+    if(flightList.length == 0){
+      getFlightList(); 
+    }
+    }
   @override
-  Widget build(BuildContext context){ 
-  getFlightList();
+  Widget build(BuildContext context){
     return (
       WillPopScope(
       onWillPop:(){
