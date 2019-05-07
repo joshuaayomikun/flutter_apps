@@ -48,7 +48,11 @@ return DateFormat('yyyy-MM-dd').format(date);
   builder: (BuildContext context, Widget child) {
     return Theme(
       data: ThemeData.dark(),
-      child: child,
+      child: ListView(
+        children: <Widget>[
+          child
+        ],
+      ),
     );
   },
 );
