@@ -58,6 +58,7 @@ class FlightListState extends State<FlightList>{
     }
     }
     void getFlightList() async{
+      await this.getFlightLists();
       _scaffoldKey.currentState.showSnackBar(
                       new SnackBar(duration: new Duration(seconds: 4), content:
                       new Row(
@@ -67,7 +68,7 @@ class FlightListState extends State<FlightList>{
                         ],
                       ),
                       ));
-      await this.getFlightLists();
+      
     }
   @override
   Widget build(BuildContext context){ 
